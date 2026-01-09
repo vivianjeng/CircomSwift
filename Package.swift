@@ -4,23 +4,30 @@
 import PackageDescription
 
 let package = Package(
-    name: "CircomSwift",
-    products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "CircomSwift",
-            targets: ["CircomSwift"]
-        ),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "CircomSwift"
-        ),
-        .testTarget(
-            name: "CircomSwiftTests",
-            dependencies: ["CircomSwift"]
-        ),
-    ]
+  name: "CircomSwift",
+  products: [
+    // Products define the executables and libraries a package produces, making them visible to other packages.
+    .library(
+      name: "CircomSwift",
+      targets: ["CircomSwift"]
+    )
+  ],
+  targets: [
+    // Targets are the basic building blocks of a package, defining a module or a test suite.
+    // Targets can depend on other targets in this package and products from dependencies.
+    .target(
+      name: "CircomSwift",
+      plugins: [
+        .plugin(name: "CircomBuildPlugin")
+      ]
+    ),
+    .plugin(
+      name: "CircomBuildPlugin",
+      capability: .buildTool()
+    ),
+    .testTarget(
+      name: "CircomSwiftTests",
+      dependencies: ["CircomSwift"]
+    ),
+  ]
 )

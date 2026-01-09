@@ -6,24 +6,6 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
-      <PreActions>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Run Script"
-               scriptText = "#!/bin/bash&#10;set -e&#10;&#10;echo &quot;====== Pre-action Build Variables ======&quot;&#10;echo &quot;SRCROOT = $SRCROOT&quot;&#10;echo &quot;PROJECT_DIR = $PROJECT_DIR&quot;&#10;echo &quot;WORKSPACE_PATH = $WORKSPACE_PATH&quot;&#10;echo &quot;TARGET_NAME = $TARGET_NAME&quot;&#10;echo &quot;=======================================&quot;&#10;&#10;# Find project root directory&#10;if [ -n &quot;$SRCROOT&quot; ]; then&#10;    PROJECT_ROOT=&quot;$SRCROOT&quot;&#10;elif [ -n &quot;$WORKSPACE_PATH&quot; ]; then&#10;    # For Swift Package Manager: workspace is in .swiftpm/xcode/package.xcworkspace&#10;    # Project root is 3 levels up&#10;    PROJECT_ROOT=&quot;$(dirname &quot;$(dirname &quot;$(dirname &quot;$WORKSPACE_PATH&quot;)&quot;)&quot;)&quot;&#10;else&#10;    # Fallback: search for Package.swift from current directory&#10;    CURRENT_DIR=&quot;$(pwd)&quot;&#10;    PROJECT_ROOT=&quot;$CURRENT_DIR&quot;&#10;    while [ ! -f &quot;$PROJECT_ROOT/Package.swift&quot; ] &amp;&amp; [ &quot;$PROJECT_ROOT&quot; != &quot;/&quot; ]; do&#10;        PROJECT_ROOT=&quot;$(dirname &quot;$PROJECT_ROOT&quot;)&quot;&#10;    done&#10;fi&#10;&#10;echo &quot;Project root detected: $PROJECT_ROOT&quot;&#10;&#10;# Check for multiplier2_final.zkey file&#10;ZKEY_FILE=&quot;$PROJECT_ROOT/multiplier2_final.zkey&quot;&#10;if [ -f &quot;$ZKEY_FILE&quot; ]; then&#10;    echo &quot;&#x2713; Found multiplier2_final.zkey at: $ZKEY_FILE&quot;&#10;    echo &quot;  File size: $(du -h &quot;$ZKEY_FILE&quot; | cut -f1)&quot;&#10;else&#10;    echo &quot;&#x2717; ERROR: multiplier2_final.zkey not found at: $ZKEY_FILE&quot;&#10;    echo &quot;  Searched in: $PROJECT_ROOT&quot;&#10;    exit 1&#10;fi&#10;&#10;# Install mopro-cli if needed and print help&#10;cargo install mopro-cli&#10;mopro --help&#10;&#10;">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "CircomSwift"
-                     BuildableName = "CircomSwift"
-                     BlueprintName = "CircomSwift"
-                     ReferencedContainer = "container:">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-      </PreActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
