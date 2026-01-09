@@ -18,11 +18,11 @@ let package = Package(
     .target(
       name: "CircomSwift",
       plugins: [
-        .plugin(name: "CircomBuildPlugin")
+        .plugin(name: "CircomSwiftPlugin")
       ]
     ),
     .plugin(
-      name: "CircomBuildPlugin",
+      name: "CircomSwiftPlugin",
       capability: .buildTool()
     ),
     .testTarget(

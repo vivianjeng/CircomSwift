@@ -2,56 +2,64 @@ import PackagePlugin
 import Foundation
 
 @main
-struct CircomBuildPlugin: BuildToolPlugin {
+struct CircomSwiftPlugin: BuildToolPlugin {
 
   func createBuildCommands(
     context: PluginContext,
     target: Target
   ) throws -> [Command] {
 
-    // URL where plugin can write outputs
-    let outputDir = context.pluginWorkDirectoryURL
+    // Get package directory
     let packageDir = context.package.directoryURL
+    let fileManager = FileManager.default
     
-    // Example: just echo for now
-    return [
-      .prebuildCommand(
-        displayName: "CircomSwift: prepare artifacts",
-        executable: URL(fileURLWithPath: "/bin/bash"),
-        arguments: [
-          "-c",
+    // Search for .circom and .zkey files in the package directory
+    var circomFiles: [URL] = []
+    var zkeyFiles: [URL] = []
+    
+    // Recursively search for files
+    if let enumerator = fileManager.enumerator(
+      at: packageDir,
+      includingPropertiesForKeys: [.isRegularFileKey, .nameKey],
+      options: [.skipsHiddenFiles, .skipsPackageDescendants]
+    ) {
+      for case let fileURL as URL in enumerator {
+        // Skip .build and .git directories
+        let path = fileURL.path
+        if path.contains("/.build/") || path.contains("/.git/") {
+          enumerator.skipDescendants()
+          continue
+        }
+        
+        let fileExtension = fileURL.pathExtension.lowercased()
+        if fileExtension == "circom" {
+          circomFiles.append(fileURL)
+        } else if fileExtension == "zkey" {
+          zkeyFiles.append(fileURL)
+        }
+      }
+    }
+    
+    // Validate matching pairs
+    for circomFile in circomFiles {
+      let fileName = circomFile.deletingPathExtension().lastPathComponent
+      let expectedZkeyName = fileName + "_final.zkey"
+      
+      let hasMatchingZkey = zkeyFiles.contains { zkeyFile in
+        zkeyFile.lastPathComponent == expectedZkeyName
+      }
+      
+      if !hasMatchingZkey {
+        Diagnostics.error(
           """
-          set -e
-          # Package directory passed from Swift context
-          PACKAGE_DIR="\(packageDir.path)"
-          PLUGIN_WORK_DIR="\(outputDir.path)"
-          
-          # Write to log file in plugin work directory (guaranteed to be writable)
-          LOG_FILE="$PLUGIN_WORK_DIR/build.log"
-          
-          # Output messages - they will be visible in build output
-          echo "=== CircomSwift Build Plugin ===" >&2
-          echo "Building target: \(target.name)" >&2
-          echo "Plugin work dir: $PLUGIN_WORK_DIR" >&2
-          echo "Package directory: $PACKAGE_DIR" >&2
-          echo "Timestamp: $(date)" >&2
-          echo "=================================" >&2
-          
-          # Also save to log file
-          {
-            echo "=== CircomSwift Build Plugin ==="
-            echo "Building target: \(target.name)"
-            echo "Plugin work dir: $PLUGIN_WORK_DIR"
-            echo "Package directory: $PACKAGE_DIR"
-            echo "Timestamp: $(date)"
-            echo "================================="
-          } > "$LOG_FILE" 2>&1
-          
-          echo "📝 Detailed log saved to: $LOG_FILE" >&2
-          """,
-        ],
-        outputFilesDirectory: outputDir
-      )
-    ]
+          Missing zkey for circuit \(circomFile.lastPathComponent).
+          Expected: \(expectedZkeyName)
+          Searched in: \(packageDir.path)
+          """)
+      }
+    }
+    
+    // Return empty commands if validation passes (or if no source target)
+    return []
   }
 }
