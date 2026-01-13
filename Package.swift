@@ -10,6 +10,10 @@ let package = Package(
     .library(
       name: "CircomSwift",
       targets: ["CircomSwift"]
+    ),
+    .plugin(
+      name: "CircomSwiftPlugin",
+      targets: ["CircomSwiftPlugin"]
     )
   ],
   targets: [
@@ -27,7 +31,15 @@ let package = Package(
     ),
     .testTarget(
       name: "CircomSwiftTests",
-      dependencies: ["CircomSwift"]
+      dependencies: ["CircomSwift"],
+      path: "Tests/CircomSwiftTests/",
+      resources: [
+        .copy("Circuits/multiplier2.wasm"),
+        .copy("Circuits/multiplier2_final.zkey")
+      ],
+      plugins: [
+        .plugin(name: "CircomSwiftPlugin")
+      ]
     ),
   ]
 )
